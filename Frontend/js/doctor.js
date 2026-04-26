@@ -80,7 +80,8 @@ document.getElementById('nextBtn').addEventListener('click', async () => {
       alert(data.message);
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error calling next patient:', error);
+    alert('Failed to call next patient. ' + error.message);
   }
 });
 
@@ -115,7 +116,8 @@ document.getElementById('completeBtn').addEventListener('click', async () => {
       alert(data.message);
     }
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error completing consultation:', error);
+    alert('Failed to complete consultation. ' + error.message);
   }
 });
 
