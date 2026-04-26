@@ -149,6 +149,7 @@ const getMedicalHistory = async (req, res) => {
 const getEstimatedWaitTime = async (req, res) => {
   try {
     const { doctorId } = req.params;
+    const patientId = req.user.id;
 
     // 1. Get average consultation duration from last 20 completed appointments
     const completedAppointments = await Appointment.find({
@@ -170,13 +171,23 @@ const getEstimatedWaitTime = async (req, res) => {
       avgConsultationMinutes = Math.round(totalMinutes / completedAppointments.length);
     }
 
-    // 2. Count patients ahead in queue (waiting)
-    const waitingPatients = await Appointment.countDocuments({
+    // 2. Find THIS patient's active appointment to get their token
+    const myAppointment = await Appointment.findOne({
+      patientId,
       doctorId,
-      status: 'waiting'
+      status: { $in: ['waiting', 'in-progress'] }
     });
 
-    // 3. Check if someone is currently in-progress
+    const myToken = myAppointment ? myAppointment.token : Infinity;
+
+    // 3. Count patients ahead — only those with a LOWER token AND still waiting/in-progress
+    const patientsAhead = await Appointment.countDocuments({
+      doctorId,
+      token: { $lt: myToken },
+      status: { $in: ['waiting', 'in-progress'] }
+    });
+
+    // 4. Check if someone is currently in-progress
     const inProgress = await Appointment.findOne({
       doctorId,
       status: 'in-progress'
@@ -190,12 +201,12 @@ const getEstimatedWaitTime = async (req, res) => {
       currentWaitMinutes = Math.round(remaining);
     }
 
-    // 4. Calculate total estimated wait
-    const estimatedMinutes = currentWaitMinutes + (waitingPatients * avgConsultationMinutes);
+    // 5. Calculate total estimated wait
+    const estimatedMinutes = currentWaitMinutes + (patientsAhead * avgConsultationMinutes);
 
     res.status(200).json({
       estimatedMinutes,
-      patientsAhead: waitingPatients + (inProgress ? 1 : 0),
+      patientsAhead,
       avgConsultationMinutes,
       dataPoints: completedAppointments.length
     });
