@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - SmartQueue</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-body">
+
+    <div class="auth-container">
+        <div class="auth-card">
+
+            <h2>Welcome Back</h2>
+            <p class="auth-subtitle">Login to your SmartQueue account</p>
+
+            <form id="loginForm">
+
+            <div class="input-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="Enter your email" required>
+           </div>
+
+           <div class="input-group">
+           <label>Password</label>
+           <input type="password" id="loginPassword" placeholder="Enter your password" required>
+           </div>
+
+           <button type="submit" class="btn-primary full-btn">Login</button>
+
+          </form>
+
+          <!-- Divider -->
+          <div class="auth-divider">
+            <span>OR</span>
+          </div>
+
+          <!-- Google Sign-In — rendered by Google's API -->
+          <div id="g_id_onload"
+               data-client_id="387755545493-l8211r3kcs88fv990s08mt3k4cha4clr.apps.googleusercontent.com"
+               data-context="signin"
+               data-callback="handleGoogleCredentialResponse"
+               data-auto_prompt="false">
+          </div>
+          <div class="g_id_signin"
+               data-type="standard"
+               data-shape="rectangular"
+               data-theme="outline"
+               data-text="signin_with"
+               data-size="large"
+               data-logo_alignment="left"
+               data-width="300">
+          </div>
+
+         <script src="js/auth.js"></script>
+
+            <p class="auth-footer">
+                Don't have an account? 
+                <a href="register.html">Register here</a>
+            </p>
+
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Register - SmartQueue</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body class="auth-body">
+
+<div class="auth-container">
+
+<div class="auth-card">
+
+<h2>Create Account</h2>
+<p class="auth-subtitle">Register to access Smart Queue System</p>
+
+<form id="registerForm">
+
+<div class="input-group">
+<label>Full Name</label>
+<input type="text" id="name" placeholder="Enter your name" required>
+</div>
+
+<div class="input-group">
+<label>Email</label>
+<input type="email" id="email" placeholder="Enter your email" required>
+</div>
+
+<div class="input-group">
+<label>Password</label>
+<input type="password" id="password" placeholder="Create password" required>
+</div>
+
+<div class="input-group">
+<label>Select Role</label>
+<select id="role" required>
+<option value="">Choose role</option>
+<option value="patient">Patient</option>
+<option value="doctor">Doctor</option>
+<option value="staff">Staff</option>
+</select>
+</div>
+
+<button type="submit" class="btn-primary full-btn">Register</button>
+
+</form>
+
+<!-- Divider -->
+<div class="auth-divider">
+  <span>OR</span>
+</div>
+
+<!-- Google Sign-Up — rendered by Google's API -->
+<p class="google-hint">Select a role above, then sign up with Google:</p>
+<div id="g_id_onload"
+     data-client_id="387755545493-l8211r3kcs88fv990s08mt3k4cha4clr.apps.googleusercontent.com"
+     data-context="signup"
+     data-callback="handleGoogleRegisterResponse"
+     data-auto_prompt="false">
+</div>
+<div class="g_id_signin"
+     data-type="standard"
+     data-shape="rectangular"
+     data-theme="outline"
+     data-text="signup_with"
+     data-size="large"
+     data-logo_alignment="left"
+     data-width="300">
+</div>
+
+<script src="js/auth.js"></script>
+
+<p class="auth-footer">
+Already have an account? 
+<a href="login.html">Login here</a>
+</p>
+
+</div>
+</div>
+
+</body>
+</html>

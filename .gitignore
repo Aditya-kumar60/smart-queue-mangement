@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Environment variables (NEVER push this)
+.env
+backend/.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Report files (not needed for deployment)
+*.docx
+*.pdf
+*.py
+doc_content.json
+pdf_pages_text.json
+
+# Image/report assets (not needed for deployment)
+extracted_images/
+final_report_images/
+pdf_pages/
+report_screenshots/
+*.png
+*.jpg
+*.svg
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Staff Dashboard</title>
+<link rel="stylesheet" href="../css/staff.css">
+</head>
+
+<body>
+
+<header class="header">
+
+<h2>Staff Dashboard</h2>
+
+<div class="header-right">
+<span id="staffName">Staff</span>
+<button id="logoutBtn">Logout</button>
+</div>
+
+</header>
+
+
+<div class="container">
+
+<div class="stats">
+
+<div class="card">
+<h3>Total Appointments</h3>
+<p id="totalAppointments">--</p>
+</div>
+
+<div class="card">
+<h3>Patients Waiting</h3>
+<p id="patientsWaiting">--</p>
+</div>
+
+<div class="card">
+<h3>Doctors Available</h3>
+<p id="doctorsAvailable">--</p>
+</div>
+
+</div>
+
+
+<section class="add-patient">
+
+<h3>Add Walk-in Patient</h3>
+
+<form id="walkinForm">
+
+<input type="text" id="patientName" placeholder="Patient Name" required>
+
+<input type="text" id="symptoms" placeholder="Symptoms" required>
+
+<select id="doctorSelect" required>
+<option value="">Select Doctor</option>
+</select>
+
+<button type="submit">Assign Token</button>
+
+</form>
+
+</section>
+
+
+<section class="appointments">
+
+<h3>Today's Appointments</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Token</th>
+<th>Patient</th>
+<th>Doctor</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="appointmentsTable">
+
+</tbody>
+
+</table>
+
+</section>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="../js/staff.js"></script>
+
+</body>
+
+</html>

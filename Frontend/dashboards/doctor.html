@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Doctor Dashboard</title>
+<link rel="stylesheet" href="../css/doctor.css">
+</head>
+
+<body>
+
+<header class="header">
+
+<div class="logo">
+<h2>Doctor Dashboard</h2>
+</div>
+
+<div class="doctor-info">
+<span id="doctorName">Dr. Loading...</span>
+<button id="logoutBtn">Logout</button>
+</div>
+
+</header>
+
+
+<div class="container">
+
+<div class="stats">
+
+<div class="card">
+<h3>Current Token</h3>
+<p id="currentToken">--</p>
+</div>
+
+<div class="card">
+<h3>Patients Waiting</h3>
+<p id="waitingCount">--</p>
+</div>
+
+</div>
+
+
+<section class="queue-section">
+
+<h3>Patient Queue</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Token</th>
+<th>Patient Name</th>
+<th>Symptoms</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="queueBody">
+
+</tbody>
+
+</table>
+
+</section>
+
+
+<section class="consultation">
+
+<h3>Consultation</h3>
+
+<textarea id="diagnosis" placeholder="Enter diagnosis"></textarea>
+
+<textarea id="prescription" placeholder="Enter prescription"></textarea>
+
+<div class="actions">
+
+<button id="nextBtn">Next Patient</button>
+
+<button id="completeBtn">Complete Consultation</button>
+
+</div>
+
+</section>
+<!-- PAST CONSULTATIONS -->
+<section class="past-consultations">
+
+  <h3>Past Consultations</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Patient</th>
+        <th>Token</th>
+        <th>Diagnosis</th>
+        <th>Prescription</th>
+      </tr>
+    </thead>
+    <tbody id="consultationsTable">
+    </tbody>
+  </table>
+
+</section>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="../js/doctor.js"></script>
+
+</body>
+
+</html>

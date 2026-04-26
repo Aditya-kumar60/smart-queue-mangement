@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Patient Dashboard</title>
+<link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+
+<nav class="dashboard-nav">
+<div class="logo">SmartQueue</div>
+
+<div class="nav-right">
+<span>Patient Dashboard</span>
+<button class="logout-btn">Logout</button>
+</div>
+</nav>
+
+
+<div class="dashboard-container">
+
+<!-- WELCOME -->
+<div class="card welcome-card">
+<h2 id="patientName">Welcome</h2>
+<p>Your Next Token: <strong id="patientToken">--</strong></p>
+</div>
+
+
+<!-- BOOK APPOINTMENT -->
+<div class="card">
+
+<h3>Book Appointment</h3>
+
+<form id="appointmentForm">
+
+<div class="form-row">
+
+<select id="doctorSelect">
+<option>Select Doctor</option>
+</select>
+
+<input type="date" id="appointmentDate" required>
+
+<input type="time" id="appointmentTime" required>
+
+</div>
+
+<button class="btn-primary">Book Appointment</button>
+
+</form>
+
+</div>
+
+
+<!-- QUEUE STATUS -->
+
+<div class="card">
+
+<h3>Queue Status</h3>
+
+<p>Current Token: <strong id="currentToken">--</strong></p>
+
+<p>Your Token: <strong id="myToken">--</strong></p>
+
+</div>
+
+
+<!-- APPOINTMENT HISTORY -->
+
+<div class="card">
+
+<h3>Appointment History</h3>
+
+<table>
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Doctor</th>
+<th>Token</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="historyTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+<!-- MEDICAL HISTORY -->
+<div class="card">
+  <h3>Medical History</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Doctor</th>
+        <th>Token</th>
+        <th>Diagnosis</th>
+        <th>Prescription</th>
+      </tr>
+    </thead>
+    <tbody id="medicalHistoryTable">
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="../js/patient.js"></script>
+
+
+
+</body>
+</html>
