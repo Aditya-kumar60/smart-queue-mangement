@@ -73,54 +73,24 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(to right, #4facfe, #00f2fe);
   color: white;
   padding: 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(79,172,254,0.15) 0%, transparent 70%);
-  top: -100px;
-  right: -100px;
-  border-radius: 50%;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(0,242,254,0.1) 0%, transparent 70%);
-  bottom: -80px;
-  left: -80px;
-  border-radius: 50%;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
 }
 
 .hero h1 {
   font-size: 42px;
   margin-bottom: 20px;
-  background: linear-gradient(90deg, #4facfe, #00f2fe);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .hero p {
   max-width: 600px;
   margin: 0 auto 25px auto;
   font-size: 18px;
-  color: #b0c4de;
+}
+
+.hero-cta {
+  display: inline-block;
 }
 
 /* ─── ROLE SELECTION ─────────────────────────────── */
@@ -132,7 +102,7 @@ body {
 
 .role-section h2 {
   font-size: 30px;
-  color: #1a1a2e;
+  color: #2c3e50;
   margin-bottom: 10px;
 }
 
@@ -157,7 +127,7 @@ body {
   width: 280px;
   border-radius: 16px;
   box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-  cursor: pointer;
+  cursor: default;
   transition: transform 0.3s, box-shadow 0.3s;
   border: 2px solid transparent;
   position: relative;
@@ -191,17 +161,9 @@ body {
   box-shadow: 0 15px 40px rgba(0,0,0,0.15);
 }
 
-.role-patient:hover {
-  border-color: #4facfe;
-}
-
-.role-doctor:hover {
-  border-color: #43e97b;
-}
-
-.role-staff:hover {
-  border-color: #fa709a;
-}
+.role-patient:hover { border-color: #4facfe; }
+.role-doctor:hover { border-color: #43e97b; }
+.role-staff:hover { border-color: #fa709a; }
 
 .role-icon {
   font-size: 48px;
@@ -210,11 +172,11 @@ body {
 
 .role-card h3 {
   font-size: 22px;
-  color: #1a1a2e;
+  color: #2c3e50;
   margin-bottom: 12px;
 }
 
-.role-card p {
+.role-card > p {
   color: #666;
   font-size: 14px;
   line-height: 1.6;
@@ -231,20 +193,18 @@ body {
 .role-btn {
   padding: 9px 20px !important;
   font-size: 14px !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
 }
 
 /* ─── FEATURES ───────────────────────────────────── */
 .features {
-  padding: 70px 20px;
+  padding: 60px 20px;
   text-align: center;
-  background: white;
 }
 
 .features h2 {
-  margin-bottom: 45px;
-  font-size: 30px;
-  color: #1a1a2e;
+  margin-bottom: 40px;
+  font-size: 28px;
 }
 
 .feature-grid {
@@ -252,23 +212,14 @@ body {
   justify-content: center;
   gap: 25px;
   flex-wrap: wrap;
-  max-width: 1000px;
-  margin: 0 auto;
 }
 
 .feature-card {
-  background: #f8faff;
-  padding: 30px 25px;
-  width: 280px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-  transition: transform 0.3s, box-shadow 0.3s;
-  border: 1px solid #eef2ff;
-}
-
-.feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  background: white;
+  padding: 25px;
+  width: 260px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .feature-icon {
@@ -277,14 +228,7 @@ body {
 }
 
 .feature-card h3 {
-  margin-bottom: 12px;
-  color: #1a1a2e;
-}
-
-.feature-card p {
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
+  margin-bottom: 15px;
 }
 
 /* ─── FOOTER ─────────────────────────────────────── */
@@ -557,6 +501,15 @@ td[colspan] {
   th, td {
     padding: 8px 6px;
     font-size: 12px;
+  }
+
+  .role-grid {
+    gap: 15px;
+  }
+
+  .role-card {
+    width: 100%;
+    max-width: 340px;
   }
 }
 

@@ -25,6 +25,7 @@
                 Digitally manage appointments and eliminate physical queues
                 with real-time updates and seamless workflow.
             </p>
+            <a href="#roleSection" class="btn-primary large-btn hero-cta">Get Started ↓</a>
         </div>
     </section>
 
@@ -35,35 +36,35 @@
 
         <div class="role-grid">
             <!-- Patient Card -->
-            <div class="role-card role-patient" onclick="selectRole('patient')">
+            <div class="role-card role-patient">
                 <div class="role-icon">🧑‍🦱</div>
                 <h3>Patient</h3>
                 <p>Book appointments, view queue status, and check your medical history.</p>
                 <div class="role-actions">
                     <a href="login.html" class="btn-primary role-btn">Login</a>
-                    <a href="register.html" class="btn-outline role-btn">Register</a>
+                    <a href="register.html?role=patient" class="btn-outline role-btn">Register</a>
                 </div>
             </div>
 
             <!-- Doctor Card -->
-            <div class="role-card role-doctor" onclick="selectRole('doctor')">
+            <div class="role-card role-doctor">
                 <div class="role-icon">👨‍⚕️</div>
                 <h3>Doctor</h3>
                 <p>Manage your patient queue, complete consultations, and add prescriptions.</p>
                 <div class="role-actions">
                     <a href="login.html" class="btn-primary role-btn">Login</a>
-                    <a href="register.html" class="btn-outline role-btn">Register</a>
+                    <a href="register.html?role=doctor" class="btn-outline role-btn">Register</a>
                 </div>
             </div>
 
             <!-- Staff Card -->
-            <div class="role-card role-staff" onclick="selectRole('staff')">
+            <div class="role-card role-staff">
                 <div class="role-icon">👩‍💼</div>
                 <h3>Staff</h3>
                 <p>Add walk-in patients, manage appointments, and monitor queue statistics.</p>
                 <div class="role-actions">
                     <a href="login.html" class="btn-primary role-btn">Login</a>
-                    <a href="register.html" class="btn-outline role-btn">Register</a>
+                    <a href="register.html?role=staff" class="btn-outline role-btn">Register</a>
                 </div>
             </div>
         </div>
