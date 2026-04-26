@@ -38,13 +38,24 @@
 <div class="form-row">
 
 <select id="doctorSelect">
-<option>Select Doctor</option>
+<option value="">Select Doctor</option>
 </select>
 
 <input type="date" id="appointmentDate" required>
 
-<input type="time" id="appointmentTime" required>
+</div>
 
+<!-- TIME SLOT PICKER -->
+<div id="slotPickerContainer" class="slot-picker-container" style="display:none;">
+  <p class="slot-label">📅 Available Time Slots:</p>
+  <div id="slotGrid" class="slot-grid"></div>
+  <p id="noSlotsMsg" class="no-slots-msg" style="display:none;">No available slots for this date</p>
+</div>
+
+<input type="hidden" id="selectedTimeSlot" value="">
+
+<div class="form-row" style="margin-top: 10px;">
+  <input type="text" id="symptomsInput" placeholder="Describe your symptoms (optional)">
 </div>
 
 <button class="btn-primary">Book Appointment</button>
@@ -54,15 +65,30 @@
 </div>
 
 
-<!-- QUEUE STATUS -->
+<!-- QUEUE STATUS + ESTIMATED WAIT TIME -->
 
 <div class="card">
 
 <h3>Queue Status</h3>
 
-<p>Current Token: <strong id="currentToken">--</strong></p>
-
-<p>Your Token: <strong id="myToken">--</strong></p>
+<div class="queue-status-grid">
+  <div class="queue-stat-item">
+    <span class="queue-stat-label">Current Token</span>
+    <strong id="currentToken" class="queue-stat-value">--</strong>
+  </div>
+  <div class="queue-stat-item">
+    <span class="queue-stat-label">Your Token</span>
+    <strong id="myToken" class="queue-stat-value">--</strong>
+  </div>
+  <div class="queue-stat-item wait-time-item">
+    <span class="queue-stat-label">⏱ Estimated Wait</span>
+    <strong id="estimatedWait" class="queue-stat-value wait-time-value">--</strong>
+  </div>
+  <div class="queue-stat-item">
+    <span class="queue-stat-label">Patients Ahead</span>
+    <strong id="patientsAhead" class="queue-stat-value">--</strong>
+  </div>
+</div>
 
 </div>
 
@@ -80,6 +106,7 @@
 <th>Date</th>
 <th>Doctor</th>
 <th>Token</th>
+<th>Time Slot</th>
 <th>Status</th>
 </tr>
 </thead>

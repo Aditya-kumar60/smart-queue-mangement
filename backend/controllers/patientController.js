@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const Appointment = require('../models/Appointment');
 const Medical = require('../models/Medical');
+const DoctorSchedule = require('../models/DoctorSchedule');
 const { sendAppointmentBookedEmail } = require('../utils/emailService');
 
 // GET all doctors list
@@ -16,7 +17,7 @@ const getDoctors = async (req, res) => {
 // POST book appointment
 const bookAppointment = async (req, res) => {
   try {
-    const { doctorId, symptoms } = req.body;
+    const { doctorId, symptoms, appointmentDate, timeSlot } = req.body;
     const patientId = req.user.id;
 
     if (!doctorId) {
@@ -59,14 +60,16 @@ const bookAppointment = async (req, res) => {
       token = lastAppointment.token + 1;
     }
 
-    // Create appointment
+    // Create appointment with date and time slot
     const appointment = await Appointment.create({
       patientId,
       patientName: patient.name,
       doctorId,
       symptoms: symptoms || '',
       token,
-      status: 'waiting'
+      status: 'waiting',
+      appointmentDate: appointmentDate || null,
+      timeSlot: timeSlot || null
     });
 
     // Notify doctor via email (non-blocking)
@@ -142,10 +145,145 @@ const getMedicalHistory = async (req, res) => {
   }
 };
 
+// ─── GET ESTIMATED WAIT TIME ──────────────────────────────
+const getEstimatedWaitTime = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+
+    // 1. Get average consultation duration from last 20 completed appointments
+    const completedAppointments = await Appointment.find({
+      doctorId,
+      status: 'completed',
+      startedAt: { $ne: null },
+      completedAt: { $ne: null }
+    })
+    .sort({ completedAt: -1 })
+    .limit(20);
+
+    let avgConsultationMinutes = 10; // default 10 min if no data
+
+    if (completedAppointments.length > 0) {
+      const totalMinutes = completedAppointments.reduce((sum, apt) => {
+        const duration = (new Date(apt.completedAt) - new Date(apt.startedAt)) / 60000;
+        return sum + Math.max(duration, 1); // minimum 1 min
+      }, 0);
+      avgConsultationMinutes = Math.round(totalMinutes / completedAppointments.length);
+    }
+
+    // 2. Count patients ahead in queue (waiting)
+    const waitingPatients = await Appointment.countDocuments({
+      doctorId,
+      status: 'waiting'
+    });
+
+    // 3. Check if someone is currently in-progress
+    const inProgress = await Appointment.findOne({
+      doctorId,
+      status: 'in-progress'
+    });
+
+    let currentWaitMinutes = 0;
+    if (inProgress && inProgress.startedAt) {
+      // Time already spent on current patient
+      const elapsed = (new Date() - new Date(inProgress.startedAt)) / 60000;
+      const remaining = Math.max(avgConsultationMinutes - elapsed, 0);
+      currentWaitMinutes = Math.round(remaining);
+    }
+
+    // 4. Calculate total estimated wait
+    const estimatedMinutes = currentWaitMinutes + (waitingPatients * avgConsultationMinutes);
+
+    res.status(200).json({
+      estimatedMinutes,
+      patientsAhead: waitingPatients + (inProgress ? 1 : 0),
+      avgConsultationMinutes,
+      dataPoints: completedAppointments.length
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// ─── GET AVAILABLE SLOTS ──────────────────────────────────
+const getAvailableSlots = async (req, res) => {
+  try {
+    const { doctorId, date } = req.params; // date = "2026-04-27"
+
+    const selectedDate = new Date(date);
+    const dayOfWeek = selectedDate.getDay(); // 0-6
+
+    // 1. Get doctor's schedule for this day
+    const schedule = await DoctorSchedule.findOne({
+      doctorId,
+      dayOfWeek,
+      isAvailable: true
+    });
+
+    if (!schedule) {
+      return res.status(200).json({
+        available: false,
+        message: 'Doctor is not available on this day',
+        slots: []
+      });
+    }
+
+    // 2. Generate all possible slots
+    const slots = [];
+    const [startH, startM] = schedule.startTime.split(':').map(Number);
+    const [endH, endM] = schedule.endTime.split(':').map(Number);
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
+    const duration = schedule.slotDurationMinutes;
+
+    for (let t = startMinutes; t + duration <= endMinutes; t += duration) {
+      const h = Math.floor(t / 60).toString().padStart(2, '0');
+      const m = (t % 60).toString().padStart(2, '0');
+      slots.push(`${h}:${m}`);
+    }
+
+    // 3. Get already booked slots for this doctor on this date
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const bookedAppointments = await Appointment.find({
+      doctorId,
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay },
+      status: { $in: ['waiting', 'in-progress'] }
+    });
+
+    const bookedSlots = bookedAppointments
+      .map(a => a.timeSlot)
+      .filter(Boolean);
+
+    // 4. Filter out booked slots
+    const availableSlots = slots.filter(s => !bookedSlots.includes(s));
+
+    res.status(200).json({
+      available: true,
+      slots: availableSlots,
+      bookedSlots,
+      totalSlots: slots.length,
+      schedule: {
+        startTime: schedule.startTime,
+        endTime: schedule.endTime,
+        slotDuration: schedule.slotDurationMinutes
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 module.exports = {
   getDoctors,
   bookAppointment,
   getMyAppointments,
   getQueueStatus,
-  getMedicalHistory
+  getMedicalHistory,
+  getEstimatedWaitTime,
+  getAvailableSlots
 };

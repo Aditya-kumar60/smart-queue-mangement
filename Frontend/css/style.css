@@ -584,3 +584,135 @@ td[colspan] {
   display: flex;
   justify-content: center;
 }
+
+/* ─── TIME SLOT PICKER ──────────────────────────────── */
+.slot-picker-container {
+  margin: 15px 0;
+  padding: 15px;
+  background: #f8f9ff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.slot-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.slot-btn {
+  padding: 8px 4px;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: #444;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.slot-btn:hover {
+  border-color: #007bff;
+  color: #007bff;
+  background: #f0f7ff;
+}
+
+.slot-active {
+  background: linear-gradient(45deg, #007bff, #0056b3) !important;
+  color: white !important;
+  border-color: #007bff !important;
+  box-shadow: 0 3px 10px rgba(0,123,255,0.3);
+}
+
+.no-slots-msg {
+  text-align: center;
+  color: #e74c3c;
+  font-size: 14px;
+  font-style: italic;
+  padding: 15px;
+}
+
+/* ─── QUEUE STATUS GRID ─────────────────────────────── */
+.queue-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.queue-stat-item {
+  text-align: center;
+  padding: 15px 10px;
+  background: #f8f9ff;
+  border-radius: 10px;
+  border: 1px solid #e8ecf4;
+}
+
+.queue-stat-label {
+  display: block;
+  font-size: 12px;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.queue-stat-value {
+  display: block;
+  font-size: 24px;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.wait-time-item {
+  background: linear-gradient(135deg, #fff5f5, #fff0f6);
+  border-color: #fdd;
+}
+
+.wait-time-value {
+  color: #e74c3c !important;
+  font-size: 20px !important;
+}
+
+/* ─── STATUS BADGES ─────────────────────────────────── */
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-waiting {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-in-progress {
+  background: #cce5ff;
+  color: #004085;
+}
+
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* ─── RESPONSIVE SLOT GRID ──────────────────────────── */
+@media (max-width: 768px) {
+  .slot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .queue-status-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

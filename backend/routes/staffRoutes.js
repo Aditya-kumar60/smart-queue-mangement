@@ -6,7 +6,8 @@ const {
   getAppointments,
   addWalkin,
   cancelAppointment,
-  getStats
+  getStats,
+  getAnalytics
 } = require('../controllers/staffController');
 
 router.get('/doctors', protect, getDoctors);
@@ -14,5 +15,6 @@ router.get('/appointments', protect, getAppointments);
 router.post('/walkin', protect, addWalkin);
 router.delete('/appointments/:id', protect, cancelAppointment);
 router.get('/stats', protect, getStats);
+router.get('/analytics', protect, getAnalytics);
 
 module.exports = router;

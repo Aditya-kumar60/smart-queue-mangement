@@ -10,6 +10,9 @@ if (!token || localStorage.getItem('role') !== 'staff') {
 // Set staff name
 document.getElementById('staffName').textContent = userName || 'Staff';
 
+// Chart instances (to destroy before re-creating)
+let chartInstances = {};
+
 // ─── LOAD STATS ────────────────────────────────────────
 const loadStats = async () => {
   try {
@@ -63,7 +66,7 @@ const loadAppointments = async () => {
 
     if (appointments.length === 0) {
       tbody.innerHTML =
-        '<tr><td colspan="5">No appointments found</td></tr>';
+        '<tr><td colspan="6">No appointments found</td></tr>';
       return;
     }
 
@@ -73,11 +76,14 @@ const loadAppointments = async () => {
       if (a.status === 'in-progress') statusColor = '#2c6ed5'; // blue
       if (a.status === 'completed') statusColor = '#27ae60';   // green
 
+      const slotDisplay = a.timeSlot ? formatTime(a.timeSlot) : '--';
+
       tbody.innerHTML += `
         <tr>
           <td>${a.token}</td>
           <td>${a.patientName}</td>
           <td>${a.doctorId ? a.doctorId.name : '--'}</td>
+          <td>${slotDisplay}</td>
           <td>
             <span style="
               background:${statusColor};
@@ -103,6 +109,182 @@ const loadAppointments = async () => {
 
   } catch (error) {
     console.error('Error loading appointments:', error);
+  }
+};
+
+// Format time "09:00" → "9:00 AM"
+const formatTime = (timeStr) => {
+  const [h, m] = timeStr.split(':').map(Number);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hour = h % 12 || 12;
+  return `${hour}:${m.toString().padStart(2, '0')} ${ampm}`;
+};
+
+// ─── LOAD ANALYTICS ───────────────────────────────────
+const loadAnalytics = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/api/staff/analytics`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+
+    // Update summary cards
+    document.getElementById('analyticsToday').textContent = data.summary.totalToday;
+    document.getElementById('analyticsCompleted').textContent = data.summary.totalCompleted;
+    document.getElementById('analyticsActive').textContent = data.summary.totalActive;
+
+    // Destroy existing charts
+    Object.values(chartInstances).forEach(c => c.destroy());
+    chartInstances = {};
+
+    // Chart colors
+    const gradientBlue = 'rgba(79, 172, 254, 0.8)';
+    const gradientGreen = 'rgba(67, 233, 123, 0.8)';
+    const gradientPink = 'rgba(250, 112, 154, 0.8)';
+    const gradientPurple = 'rgba(102, 126, 234, 0.8)';
+
+    // 1. Patients Per Day (Bar Chart)
+    chartInstances.perDay = new Chart(
+      document.getElementById('patientsPerDayChart'),
+      {
+        type: 'bar',
+        data: {
+          labels: data.patientsPerDay.labels,
+          datasets: [{
+            label: 'Patients',
+            data: data.patientsPerDay.data,
+            backgroundColor: [
+              'rgba(79, 172, 254, 0.7)',
+              'rgba(67, 233, 123, 0.7)',
+              'rgba(250, 112, 154, 0.7)',
+              'rgba(102, 126, 234, 0.7)',
+              'rgba(254, 225, 64, 0.7)',
+              'rgba(0, 242, 254, 0.7)',
+              'rgba(248, 80, 50, 0.7)'
+            ],
+            borderColor: [
+              'rgba(79, 172, 254, 1)',
+              'rgba(67, 233, 123, 1)',
+              'rgba(250, 112, 154, 1)',
+              'rgba(102, 126, 234, 1)',
+              'rgba(254, 225, 64, 1)',
+              'rgba(0, 242, 254, 1)',
+              'rgba(248, 80, 50, 1)'
+            ],
+            borderWidth: 2,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          }
+        }
+      }
+    );
+
+    // 2. Peak Hours (Bar Chart)
+    const peakData = data.peakHours.data;
+    const maxPeak = Math.max(...peakData);
+    const peakColors = peakData.map(v => {
+      const intensity = maxPeak > 0 ? v / maxPeak : 0;
+      return `rgba(250, 112, 154, ${0.3 + intensity * 0.7})`;
+    });
+
+    chartInstances.peakHours = new Chart(
+      document.getElementById('peakHoursChart'),
+      {
+        type: 'bar',
+        data: {
+          labels: data.peakHours.labels,
+          datasets: [{
+            label: 'Appointments',
+            data: peakData,
+            backgroundColor: peakColors,
+            borderColor: gradientPink,
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1 } },
+            x: { ticks: { maxRotation: 45, font: { size: 10 } } }
+          }
+        }
+      }
+    );
+
+    // 3. Doctor Load (Doughnut Chart)
+    const doughnutColors = [
+      'rgba(79, 172, 254, 0.85)',
+      'rgba(67, 233, 123, 0.85)',
+      'rgba(250, 112, 154, 0.85)',
+      'rgba(102, 126, 234, 0.85)',
+      'rgba(254, 225, 64, 0.85)',
+      'rgba(0, 242, 254, 0.85)',
+      'rgba(248, 80, 50, 0.85)',
+      'rgba(118, 75, 162, 0.85)'
+    ];
+
+    chartInstances.doctorLoad = new Chart(
+      document.getElementById('doctorLoadChart'),
+      {
+        type: 'doughnut',
+        data: {
+          labels: data.doctorLoad.labels,
+          datasets: [{
+            data: data.doctorLoad.data,
+            backgroundColor: doughnutColors.slice(0, data.doctorLoad.labels.length),
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { padding: 15, font: { size: 12 } }
+            }
+          }
+        }
+      }
+    );
+
+    // 4. Avg Consultation Time (Horizontal Bar)
+    chartInstances.avgConsultation = new Chart(
+      document.getElementById('avgConsultationChart'),
+      {
+        type: 'bar',
+        data: {
+          labels: data.avgConsultationTime.labels,
+          datasets: [{
+            label: 'Avg Minutes',
+            data: data.avgConsultationTime.data,
+            backgroundColor: gradientPurple,
+            borderColor: 'rgba(102, 126, 234, 1)',
+            borderWidth: 2,
+            borderRadius: 6
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, title: { display: true, text: 'Minutes' } }
+          }
+        }
+      }
+    );
+
+  } catch (error) {
+    console.error('Error loading analytics:', error);
   }
 };
 
@@ -144,6 +326,7 @@ document.getElementById('walkinForm').addEventListener('submit',
         document.getElementById('walkinForm').reset();
         loadAppointments();
         loadStats();
+        loadAnalytics();
       } else {
         alert(data.message);
       }
@@ -171,6 +354,7 @@ const cancelAppointment = async (id) => {
       alert('Appointment cancelled successfully');
       loadAppointments();
       loadStats();
+      loadAnalytics();
     } else {
       alert(data.message);
     }
@@ -190,9 +374,11 @@ const socket = io(BASE_URL);
 socket.on('queueUpdated', () => {
   loadAppointments();
   loadStats();
+  loadAnalytics();
 });
 
 // ─── INIT ──────────────────────────────────────────────
 loadStats();
 loadDoctors();
 loadAppointments();
+loadAnalytics();

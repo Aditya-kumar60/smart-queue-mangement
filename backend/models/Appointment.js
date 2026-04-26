@@ -31,6 +31,22 @@ const appointmentSchema = new mongoose.Schema({
   isWalkin: {
     type: Boolean,
     default: false
+  },
+  appointmentDate: {
+    type: Date,
+    default: null
+  },
+  timeSlot: {
+    type: String,
+    default: null
+  },
+  startedAt: {
+    type: Date,
+    default: null
+  },
+  completedAt: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 

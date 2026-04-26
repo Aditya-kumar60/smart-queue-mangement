@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <title>Staff Dashboard</title>
 <link rel="stylesheet" href="../css/staff.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
@@ -75,6 +76,7 @@
 <th>Token</th>
 <th>Patient</th>
 <th>Doctor</th>
+<th>Time Slot</th>
 <th>Status</th>
 <th>Action</th>
 </tr>
@@ -86,6 +88,54 @@
 
 </table>
 
+</section>
+
+<!-- ─── ANALYTICS SECTION ─────────────────────────── -->
+<section class="analytics-section">
+  <h3>📊 Analytics Dashboard</h3>
+  
+  <div class="analytics-summary">
+    <div class="summary-card summary-today">
+      <span class="summary-icon">📅</span>
+      <div>
+        <p class="summary-value" id="analyticsToday">--</p>
+        <p class="summary-label">Today's Patients</p>
+      </div>
+    </div>
+    <div class="summary-card summary-completed">
+      <span class="summary-icon">✅</span>
+      <div>
+        <p class="summary-value" id="analyticsCompleted">--</p>
+        <p class="summary-label">Total Completed</p>
+      </div>
+    </div>
+    <div class="summary-card summary-active">
+      <span class="summary-icon">🔄</span>
+      <div>
+        <p class="summary-value" id="analyticsActive">--</p>
+        <p class="summary-label">Currently Active</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="charts-grid">
+    <div class="chart-card">
+      <h4>Patients Per Day (Last 7 Days)</h4>
+      <canvas id="patientsPerDayChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>Peak Hours Distribution</h4>
+      <canvas id="peakHoursChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>Doctor-wise Patient Load</h4>
+      <canvas id="doctorLoadChart"></canvas>
+    </div>
+    <div class="chart-card">
+      <h4>Avg Consultation Time (minutes)</h4>
+      <canvas id="avgConsultationChart"></canvas>
+    </div>
+  </div>
 </section>
 
 </div>

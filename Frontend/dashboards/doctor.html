@@ -51,6 +51,7 @@
 <th>Token</th>
 <th>Patient Name</th>
 <th>Symptoms</th>
+<th>Time Slot</th>
 <th>Status</th>
 </tr>
 </thead>
@@ -81,6 +82,21 @@
 </div>
 
 </section>
+
+<!-- MY SCHEDULE -->
+<section class="schedule-section">
+  <h3>My Weekly Schedule</h3>
+  <p class="schedule-desc">Set your availability for each day. Patients will see available time slots based on this schedule.</p>
+  
+  <div id="scheduleGrid" class="schedule-grid">
+    <!-- Will be populated by JS -->
+  </div>
+
+  <div class="schedule-actions">
+    <button id="saveScheduleBtn">💾 Save Schedule</button>
+  </div>
+</section>
+
 <!-- PAST CONSULTATIONS -->
 <section class="past-consultations">
 
