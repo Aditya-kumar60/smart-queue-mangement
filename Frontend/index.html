@@ -2,57 +2,113 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Queue & Appointment System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-    
+    <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="logo">SmartQueue</div>
+        <div class="logo">🏥 SmartQueue</div>
         <div class="nav-buttons">
             <a href="login.html" class="btn-outline">Login</a>
             <a href="register.html" class="btn-primary">Register</a>
-        </div> 
+        </div>
     </nav>
 
-    
+    <!-- HERO SECTION -->
     <section class="hero">
         <div class="hero-content">
             <h1>Smart Queue & Appointment Management</h1>
             <p>
-                Digitally manage appointments and eliminate physical queues 
+                Digitally manage appointments and eliminate physical queues
                 with real-time updates and seamless workflow.
             </p>
-            <div class="hero-buttons">
-                <a href="register.html" class="btn-primary large-btn">Get Started</a>
-                <a href="login.html" class="btn-outline large-btn">Login</a>
+        </div>
+    </section>
+
+    <!-- ROLE SELECTION SECTION -->
+    <section class="role-section" id="roleSection">
+        <h2>Select Your Role to Continue</h2>
+        <p class="role-subtitle">Choose how you'd like to use SmartQueue</p>
+
+        <div class="role-grid">
+            <!-- Patient Card -->
+            <div class="role-card role-patient" onclick="selectRole('patient')">
+                <div class="role-icon">🧑‍🦱</div>
+                <h3>Patient</h3>
+                <p>Book appointments, view queue status, and check your medical history.</p>
+                <div class="role-actions">
+                    <a href="login.html" class="btn-primary role-btn">Login</a>
+                    <a href="register.html" class="btn-outline role-btn">Register</a>
+                </div>
+            </div>
+
+            <!-- Doctor Card -->
+            <div class="role-card role-doctor" onclick="selectRole('doctor')">
+                <div class="role-icon">👨‍⚕️</div>
+                <h3>Doctor</h3>
+                <p>Manage your patient queue, complete consultations, and add prescriptions.</p>
+                <div class="role-actions">
+                    <a href="login.html" class="btn-primary role-btn">Login</a>
+                    <a href="register.html" class="btn-outline role-btn">Register</a>
+                </div>
+            </div>
+
+            <!-- Staff Card -->
+            <div class="role-card role-staff" onclick="selectRole('staff')">
+                <div class="role-icon">👩‍💼</div>
+                <h3>Staff</h3>
+                <p>Add walk-in patients, manage appointments, and monitor queue statistics.</p>
+                <div class="role-actions">
+                    <a href="login.html" class="btn-primary role-btn">Login</a>
+                    <a href="register.html" class="btn-outline role-btn">Register</a>
+                </div>
             </div>
         </div>
     </section>
 
-    
+    <!-- FEATURES SECTION -->
     <section class="features">
         <h2>Why Choose SmartQueue?</h2>
         <div class="feature-grid">
             <div class="feature-card">
+                <div class="feature-icon">🎫</div>
                 <h3>Digital Token System</h3>
                 <p>Automatic token generation with real-time queue updates.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon">🔐</div>
                 <h3>Role-Based Access</h3>
                 <p>Secure dashboards for Patients, Doctors, and Staff.</p>
             </div>
             <div class="feature-card">
+                <div class="feature-icon">⚡</div>
                 <h3>Real-Time Updates</h3>
                 <p>Instant queue updates without refreshing the page.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📧</div>
+                <h3>Email Notifications</h3>
+                <p>Get notified instantly via email on appointment updates.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔑</div>
+                <h3>Google OAuth Login</h3>
+                <p>Quick sign-in using your Google account securely.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Medical History</h3>
+                <p>Track all past consultations, diagnoses and prescriptions.</p>
             </div>
         </div>
     </section>
 
-    
+    <!-- FOOTER -->
     <footer>
-        <p>© 2026 Smart Queue & Appointment Management System</p>
+        <p>&copy; 2026 Smart Queue & Appointment Management System</p>
     </footer>
 
 </body>
