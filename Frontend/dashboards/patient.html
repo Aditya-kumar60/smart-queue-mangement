@@ -99,47 +99,52 @@
 
 <h3>Appointment History</h3>
 
-<table>
+<div class="table-container">
+  <table>
 
-<thead>
-<tr>
-<th>Date</th>
-<th>Doctor</th>
-<th>Token</th>
-<th>Time Slot</th>
-<th>Status</th>
-</tr>
-</thead>
+  <thead>
+  <tr>
+  <th>Date</th>
+  <th>Doctor</th>
+  <th>Token</th>
+  <th>Time Slot</th>
+  <th>Status</th>
+  </tr>
+  </thead>
 
-<tbody id="historyTable">
+  <tbody id="historyTable">
 
-</tbody>
+  </tbody>
 
-</table>
+  </table>
+</div>
 
 </div>
 
 <!-- MEDICAL HISTORY -->
 <div class="card">
   <h3>Medical History</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Doctor</th>
-        <th>Token</th>
-        <th>Diagnosis</th>
-        <th>Prescription</th>
-      </tr>
-    </thead>
-    <tbody id="medicalHistoryTable">
-    </tbody>
-  </table>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Doctor</th>
+          <th>Token</th>
+          <th>Diagnosis</th>
+          <th>Prescription</th>
+        </tr>
+      </thead>
+      <tbody id="medicalHistoryTable">
+      </tbody>
+    </table>
+  </div>
 </div>
 
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="../js/toast.js"></script>
 <script src="../js/patient.js"></script>
 
 

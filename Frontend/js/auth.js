@@ -102,8 +102,10 @@ if (registerForm) {
       const data = await response.json();
 
       if (response.ok) {
-        alert('Registration successful! Please login to continue.');
-        window.location.href = '/login.html';
+        alert('Registration successful! You should login now.');
+        setTimeout(() => {
+          window.location.href = '/login.html';
+        }, 2000);
       } else {
         alert(data.message);
       }

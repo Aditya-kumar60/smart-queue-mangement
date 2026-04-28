@@ -42,7 +42,10 @@
 
 <section class="queue-section">
 
-<h3>Patient Queue</h3>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+  <h3 style="margin: 0;">Patient Queue</h3>
+  <input type="date" id="queueDateFilter" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; font-family: inherit;">
+</div>
 
 <table>
 
@@ -102,25 +105,28 @@
 
   <h3>Past Consultations</h3>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Patient</th>
-        <th>Token</th>
-        <th>Diagnosis</th>
-        <th>Prescription</th>
-      </tr>
-    </thead>
-    <tbody id="consultationsTable">
-    </tbody>
-  </table>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Patient</th>
+          <th>Token</th>
+          <th>Diagnosis</th>
+          <th>Prescription</th>
+        </tr>
+      </thead>
+      <tbody id="consultationsTable">
+      </tbody>
+    </table>
+  </div>
 
 </section>
 
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="../js/toast.js"></script>
 <script src="../js/doctor.js"></script>
 
 </body>

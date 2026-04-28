@@ -439,9 +439,24 @@ small[id$="-error"] {
 }
 
 /* ─── TABLE ──────────────────────────────────────── */
+.table-container {
+  max-height: 350px;
+  overflow-y: auto;
+  border-radius: 8px;
+  border: 1px solid #eee;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
+}
+
+/* Ensure header stays at the top while scrolling */
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f0f4ff;
 }
 
 thead tr {
@@ -473,6 +488,17 @@ td[colspan] {
   color: #999;
   font-style: italic;
   padding: 20px;
+}
+
+.date-group-header td {
+  background: #eef2f7 !important;
+  color: #2c3e50 !important;
+  font-weight: bold !important;
+  text-align: left !important;
+  padding: 10px 15px !important;
+  font-style: normal !important;
+  border-bottom: 2px solid #dde4eb !important;
+  border-top: 2px solid #dde4eb !important;
 }
 
 /* ─── RESPONSIVE ─────────────────────────────────── */

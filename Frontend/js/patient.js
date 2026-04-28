@@ -151,17 +151,35 @@ const loadAppointments = async () => {
       document.getElementById('patientsAhead').textContent = '--';
     }
 
-    appointments.forEach(app => {
-      const slotDisplay = app.timeSlot ? formatTime(app.timeSlot) : '--';
+    // GROUP APPOINTMENTS BY DATE
+    const groupedAppointments = appointments.reduce((acc, app) => {
+      const dateObj = new Date(app.appointmentDate || app.createdAt);
+      const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      if (!acc[dateStr]) acc[dateStr] = [];
+      acc[dateStr].push(app);
+      return acc;
+    }, {});
+
+    Object.keys(groupedAppointments).forEach(dateStr => {
+      // Add Date Header
       tbody.innerHTML += `
-        <tr>
-          <td>${new Date(app.createdAt).toLocaleDateString()}</td>
-          <td>${app.doctorId ? app.doctorId.name : '--'}</td>
-          <td>${app.token}</td>
-          <td>${slotDisplay}</td>
-          <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+        <tr class="date-group-header">
+          <td colspan="5">📅 ${dateStr}</td>
         </tr>
       `;
+      // Add rows for this date
+      groupedAppointments[dateStr].forEach(app => {
+        const slotDisplay = app.timeSlot ? formatTime(app.timeSlot) : '--';
+        tbody.innerHTML += `
+          <tr>
+            <td>${new Date(app.appointmentDate || app.createdAt).toLocaleDateString()}</td>
+            <td>${app.doctorId ? app.doctorId.name : '--'}</td>
+            <td>${app.token}</td>
+            <td>${slotDisplay}</td>
+            <td><span class="status-badge status-${app.status}">${app.status}</span></td>
+          </tr>
+        `;
+      });
     });
 
   } catch (error) {
@@ -230,16 +248,36 @@ const loadMedicalHistory = async () => {
       return;
     }
 
-    history.forEach(record => {
+    // GROUP MEDICAL HISTORY BY DATE
+    const groupedHistory = history.reduce((acc, record) => {
+      const dateObj = record.appointmentId && record.appointmentId.appointmentDate 
+        ? new Date(record.appointmentId.appointmentDate) 
+        : new Date(record.createdAt);
+      const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      if (!acc[dateStr]) acc[dateStr] = [];
+      acc[dateStr].push(record);
+      return acc;
+    }, {});
+
+    Object.keys(groupedHistory).forEach(dateStr => {
+      // Add Date Header
       tbody.innerHTML += `
-        <tr>
-          <td>${new Date(record.createdAt).toLocaleDateString()}</td>
-          <td>${record.doctorId ? record.doctorId.name : '--'}</td>
-          <td>${record.appointmentId ? record.appointmentId.token : '--'}</td>
-          <td>${record.diagnosis}</td>
-          <td>${record.prescription}</td>
+        <tr class="date-group-header">
+          <td colspan="5">📅 ${dateStr}</td>
         </tr>
       `;
+      // Add rows for this date
+      groupedHistory[dateStr].forEach(record => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${record.appointmentId && record.appointmentId.appointmentDate ? new Date(record.appointmentId.appointmentDate).toLocaleDateString() : new Date(record.createdAt).toLocaleDateString()}</td>
+            <td>${record.doctorId ? record.doctorId.name : '--'}</td>
+            <td>${record.appointmentId ? record.appointmentId.token : '--'}</td>
+            <td>${record.diagnosis}</td>
+            <td>${record.prescription}</td>
+          </tr>
+        `;
+      });
     });
 
   } catch (error) {

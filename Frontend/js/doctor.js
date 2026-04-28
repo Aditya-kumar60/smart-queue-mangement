@@ -12,10 +12,26 @@ document.getElementById('doctorName').textContent = userName || 'Doctor';
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
+// Initialize date filter
+const dateFilter = document.getElementById('queueDateFilter');
+if (dateFilter) {
+  // Only set default if it's empty
+  if (!dateFilter.value) {
+    dateFilter.value = new Date().toISOString().split('T')[0];
+  }
+  
+  dateFilter.addEventListener('change', () => {
+    loadQueue();
+  });
+}
+
 // ─── LOAD QUEUE ────────────────────────────────────────
 const loadQueue = async () => {
   try {
-    const res = await fetch(`${BASE_URL}/api/doctor/queue`, {
+    const selectedDate = dateFilter ? dateFilter.value : '';
+    const query = selectedDate ? `?date=${selectedDate}` : '';
+
+    const res = await fetch(`${BASE_URL}/api/doctor/queue${query}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -62,8 +78,17 @@ const formatTime = (timeStr) => {
 
 // ─── NEXT PATIENT ──────────────────────────────────────
 document.getElementById('nextBtn').addEventListener('click', async () => {
+  const currentToken = document.getElementById('currentToken').textContent;
+  if (currentToken !== '--') {
+    alert('Please complete the current consultation by providing a diagnosis and prescription first.');
+    return;
+  }
+
   try {
-    const res = await fetch(`${BASE_URL}/api/doctor/next`, {
+    const selectedDate = document.getElementById('queueDateFilter') ? document.getElementById('queueDateFilter').value : '';
+    const query = selectedDate ? `?date=${selectedDate}` : '';
+
+    const res = await fetch(`${BASE_URL}/api/doctor/next${query}`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -96,7 +121,10 @@ document.getElementById('completeBtn').addEventListener('click', async () => {
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/api/doctor/complete`, {
+    const selectedDate = document.getElementById('queueDateFilter') ? document.getElementById('queueDateFilter').value : '';
+    const query = selectedDate ? `?date=${selectedDate}` : '';
+
+    const res = await fetch(`${BASE_URL}/api/doctor/complete${query}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -138,16 +166,36 @@ const loadPastConsultations = async () => {
       return;
     }
 
-    consultations.forEach(c => {
+    // GROUP PAST CONSULTATIONS BY DATE
+    const groupedConsultations = consultations.reduce((acc, c) => {
+      const dateObj = c.appointmentId && c.appointmentId.appointmentDate 
+        ? new Date(c.appointmentId.appointmentDate) 
+        : new Date(c.createdAt);
+      const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      if (!acc[dateStr]) acc[dateStr] = [];
+      acc[dateStr].push(c);
+      return acc;
+    }, {});
+
+    Object.keys(groupedConsultations).forEach(dateStr => {
+      // Add Date Header
       tbody.innerHTML += `
-        <tr>
-          <td>${new Date(c.createdAt).toLocaleDateString()}</td>
-          <td>${c.patientId ? c.patientId.name : '--'}</td>
-          <td>${c.appointmentId ? c.appointmentId.token : '--'}</td>
-          <td>${c.diagnosis}</td>
-          <td>${c.prescription}</td>
+        <tr class="date-group-header">
+          <td colspan="5">📅 ${dateStr}</td>
         </tr>
       `;
+      // Add rows for this date
+      groupedConsultations[dateStr].forEach(c => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${c.appointmentId && c.appointmentId.appointmentDate ? new Date(c.appointmentId.appointmentDate).toLocaleDateString() : new Date(c.createdAt).toLocaleDateString()}</td>
+            <td>${c.patientId ? c.patientId.name : '--'}</td>
+            <td>${c.appointmentId ? c.appointmentId.token : '--'}</td>
+            <td>${c.diagnosis}</td>
+            <td>${c.prescription}</td>
+          </tr>
+        `;
+      });
     });
 
   } catch (error) {
@@ -168,35 +216,35 @@ const loadSchedule = async () => {
 
     schedule.forEach(s => {
       const dayCard = document.createElement('div');
-      dayCard.className = `schedule-day-card ${s.isAvailable ? 'schedule-available' : 'schedule-unavailable'}`;
+      dayCard.className = `schedule-row ${s.isAvailable ? 'schedule-available' : 'schedule-unavailable'}`;
       dayCard.innerHTML = `
-        <div class="schedule-day-header">
+        <div class="schedule-day-col">
           <label class="schedule-toggle">
             <input type="checkbox" class="schedule-checkbox" data-day="${s.dayOfWeek}" ${s.isAvailable ? 'checked' : ''}>
             <span class="schedule-toggle-slider"></span>
           </label>
           <span class="schedule-day-name">${DAY_NAMES[s.dayOfWeek]}</span>
         </div>
-        <div class="schedule-day-times">
-          <div class="schedule-time-row">
-            <label>Start</label>
+        <div class="schedule-time-col">
+          <div class="time-input-group">
+            <i class="time-icon">🕒</i>
             <input type="time" class="schedule-time-input" data-day="${s.dayOfWeek}" data-field="start" value="${s.startTime}" ${!s.isAvailable ? 'disabled' : ''}>
           </div>
-          <div class="schedule-time-row">
-            <label>End</label>
+          <span class="time-separator">-</span>
+          <div class="time-input-group">
             <input type="time" class="schedule-time-input" data-day="${s.dayOfWeek}" data-field="end" value="${s.endTime}" ${!s.isAvailable ? 'disabled' : ''}>
           </div>
-          <div class="schedule-time-row">
-            <label>Slot (min)</label>
-            <select class="schedule-slot-select" data-day="${s.dayOfWeek}" ${!s.isAvailable ? 'disabled' : ''}>
-              <option value="10" ${s.slotDurationMinutes === 10 ? 'selected' : ''}>10</option>
-              <option value="15" ${s.slotDurationMinutes === 15 ? 'selected' : ''}>15</option>
-              <option value="20" ${s.slotDurationMinutes === 20 ? 'selected' : ''}>20</option>
-              <option value="30" ${s.slotDurationMinutes === 30 ? 'selected' : ''}>30</option>
-              <option value="45" ${s.slotDurationMinutes === 45 ? 'selected' : ''}>45</option>
-              <option value="60" ${s.slotDurationMinutes === 60 ? 'selected' : ''}>60</option>
-            </select>
-          </div>
+        </div>
+        <div class="schedule-slot-col">
+          <span class="slot-label">⏱ Slot:</span>
+          <select class="schedule-slot-select" data-day="${s.dayOfWeek}" ${!s.isAvailable ? 'disabled' : ''}>
+            <option value="10" ${s.slotDurationMinutes === 10 ? 'selected' : ''}>10 min</option>
+            <option value="15" ${s.slotDurationMinutes === 15 ? 'selected' : ''}>15 min</option>
+            <option value="20" ${s.slotDurationMinutes === 20 ? 'selected' : ''}>20 min</option>
+            <option value="30" ${s.slotDurationMinutes === 30 ? 'selected' : ''}>30 min</option>
+            <option value="45" ${s.slotDurationMinutes === 45 ? 'selected' : ''}>45 min</option>
+            <option value="60" ${s.slotDurationMinutes === 60 ? 'selected' : ''}>60 min</option>
+          </select>
         </div>
       `;
       grid.appendChild(dayCard);
@@ -206,7 +254,7 @@ const loadSchedule = async () => {
       checkbox.addEventListener('change', () => {
         const times = dayCard.querySelectorAll('.schedule-time-input, .schedule-slot-select');
         times.forEach(t => t.disabled = !checkbox.checked);
-        dayCard.className = `schedule-day-card ${checkbox.checked ? 'schedule-available' : 'schedule-unavailable'}`;
+        dayCard.className = `schedule-row ${checkbox.checked ? 'schedule-available' : 'schedule-unavailable'}`;
       });
     });
 

@@ -338,8 +338,8 @@ document.getElementById('walkinForm').addEventListener('submit',
 
 // ─── CANCEL APPOINTMENT ────────────────────────────────
 const cancelAppointment = async (id) => {
-  if (!confirm('Are you sure you want to cancel this appointment?')) 
-    return;
+  const isConfirmed = await window.showConfirm('Are you sure you want to cancel this appointment?');
+  if (!isConfirmed) return;
 
   try {
     const res = await fetch(
