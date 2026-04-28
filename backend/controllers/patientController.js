@@ -24,6 +24,26 @@ const bookAppointment = async (req, res) => {
       return res.status(400).json({ message: 'Please select a doctor' });
     }
 
+    const targetDate = appointmentDate ? new Date(appointmentDate) : new Date();
+    const today = new Date();
+    const isToday = targetDate.getDate() === today.getDate() && 
+                    targetDate.getMonth() === today.getMonth() && 
+                    targetDate.getFullYear() === today.getFullYear();
+
+    // Check if timeSlot is in the past when booking for today
+    if (timeSlot && isToday) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      
+      const [h, m] = timeSlot.split(':').map(Number);
+      const slotTimeInMinutes = h * 60 + m;
+      
+      if (slotTimeInMinutes <= currentTimeInMinutes) {
+        return res.status(400).json({ message: 'Cannot book a past time slot for today' });
+      }
+    }
+
     // Check if patient already has active appointment with THIS doctor
     const existing = await Appointment.findOne({
       patientId,
@@ -40,22 +60,30 @@ const bookAppointment = async (req, res) => {
     // Get patient name
     const patient = await User.findById(patientId);
 
-    // Check if there are any active appointments for this doctor
+    // Generate token specific to the appointment date
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Check if there are any active appointments for this doctor ON THIS DATE
     const activeAppointments = await Appointment.find({
       doctorId: doctorId,
-      status: { $in: ['waiting', 'in-progress'] }
+      status: { $in: ['waiting', 'in-progress'] },
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     });
 
     let token;
 
     if (activeAppointments.length === 0) {
-      // No active queue → start fresh from 1
+      // No active queue for this date → start fresh from 1
       token = 1;
     } else {
-      // Queue exists → get highest token and add 1
+      // Queue exists for this date → get highest token and add 1
       const lastAppointment = await Appointment.findOne({
         doctorId: doctorId,
-        status: { $in: ['waiting', 'in-progress'] }
+        status: { $in: ['waiting', 'in-progress'] },
+        appointmentDate: { $gte: startOfDay, $lte: endOfDay }
       }).sort({ token: -1 });
       token = lastAppointment.token + 1;
     }
@@ -68,7 +96,7 @@ const bookAppointment = async (req, res) => {
       symptoms: symptoms || '',
       token,
       status: 'waiting',
-      appointmentDate: appointmentDate || null,
+      appointmentDate: targetDate,
       timeSlot: timeSlot || null
     });
 
@@ -135,7 +163,7 @@ const getMedicalHistory = async (req, res) => {
 
     const history = await Medical.find({ patientId })
       .populate('doctorId', 'name')
-      .populate('appointmentId', 'token')
+      .populate('appointmentId', 'token appointmentDate')
       .sort({ createdAt: -1 });
 
     res.status(200).json(history);
@@ -151,46 +179,52 @@ const getEstimatedWaitTime = async (req, res) => {
     const { doctorId } = req.params;
     const patientId = req.user.id;
 
-    // 1. Get average consultation duration from last 20 completed appointments
-    const completedAppointments = await Appointment.find({
-      doctorId,
-      status: 'completed',
-      startedAt: { $ne: null },
-      completedAt: { $ne: null }
-    })
-    .sort({ completedAt: -1 })
-    .limit(20);
-
-    let avgConsultationMinutes = 10; // default 10 min if no data
-
-    if (completedAppointments.length > 0) {
-      const totalMinutes = completedAppointments.reduce((sum, apt) => {
-        const duration = (new Date(apt.completedAt) - new Date(apt.startedAt)) / 60000;
-        return sum + Math.max(duration, 1); // minimum 1 min
-      }, 0);
-      avgConsultationMinutes = Math.round(totalMinutes / completedAppointments.length);
-    }
-
-    // 2. Find THIS patient's active appointment to get their token
+    // 1. Find THIS patient's active appointment to get their token and date
     const myAppointment = await Appointment.findOne({
       patientId,
       doctorId,
       status: { $in: ['waiting', 'in-progress'] }
     });
 
-    const myToken = myAppointment ? myAppointment.token : Infinity;
+    if (!myAppointment) {
+      return res.status(200).json({
+        estimatedMinutes: 0,
+        patientsAhead: 0,
+        avgConsultationMinutes: 15
+      });
+    }
 
-    // 3. Count patients ahead — only those with a LOWER token AND still waiting/in-progress
+    const myToken = myAppointment.token;
+    const targetDate = myAppointment.appointmentDate || new Date();
+    const dayOfWeek = new Date(targetDate).getDay();
+
+    // 2. Get slot duration from Doctor's Schedule
+    const schedule = await DoctorSchedule.findOne({
+      doctorId,
+      dayOfWeek,
+      isAvailable: true
+    });
+
+    const avgConsultationMinutes = schedule ? schedule.slotDurationMinutes : 15; // default 15 min if schedule not found
+
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // 3. Count patients ahead — only those with a LOWER token AND still waiting/in-progress FOR THE SAME DATE
     const patientsAhead = await Appointment.countDocuments({
       doctorId,
       token: { $lt: myToken },
-      status: { $in: ['waiting', 'in-progress'] }
+      status: { $in: ['waiting', 'in-progress'] },
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     });
 
-    // 4. Check if someone is currently in-progress
+    // 4. Check if someone is currently in-progress FOR THE SAME DATE
     const inProgress = await Appointment.findOne({
       doctorId,
-      status: 'in-progress'
+      status: 'in-progress',
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     });
 
     let currentWaitMinutes = 0;
@@ -207,8 +241,7 @@ const getEstimatedWaitTime = async (req, res) => {
     res.status(200).json({
       estimatedMinutes,
       patientsAhead,
-      avgConsultationMinutes,
-      dataPoints: completedAppointments.length
+      avgConsultationMinutes
     });
 
   } catch (error) {
@@ -270,7 +303,25 @@ const getAvailableSlots = async (req, res) => {
       .filter(Boolean);
 
     // 4. Filter out booked slots
-    const availableSlots = slots.filter(s => !bookedSlots.includes(s));
+    let availableSlots = slots.filter(s => !bookedSlots.includes(s));
+
+    // If selected date is today, filter out past slots
+    const today = new Date();
+    const isToday = selectedDate.getDate() === today.getDate() && 
+                    selectedDate.getMonth() === today.getMonth() && 
+                    selectedDate.getFullYear() === today.getFullYear();
+    
+    if (isToday) {
+      const currentHour = today.getHours();
+      const currentMinute = today.getMinutes();
+      const currentTimeInMinutes = currentHour * 60 + currentMinute;
+      
+      availableSlots = availableSlots.filter(s => {
+        const [h, m] = s.split(':').map(Number);
+        const slotTimeInMinutes = h * 60 + m;
+        return slotTimeInMinutes > currentTimeInMinutes;
+      });
+    }
 
     res.status(200).json({
       available: true,

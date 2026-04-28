@@ -8,10 +8,18 @@ const { sendTokenCalledEmail, sendConsultationCompletedEmail } = require('../uti
 const getQueue = async (req, res) => {
   try {
     const doctorId = req.user.id;
+    const { date } = req.query;
+
+    const targetDate = date ? new Date(date) : new Date();
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
 
     const queue = await Appointment.find({
       doctorId,
-      status: { $in: ['waiting', 'in-progress'] }
+      status: { $in: ['waiting', 'in-progress'] },
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     }).sort({ token: 1 });
 
     const current = queue.find(a => a.status === 'in-progress');
@@ -33,18 +41,43 @@ const nextPatient = async (req, res) => {
   try {
     const doctorId = req.user.id;
 
-    // Complete current in-progress if any
-    const currentPatient = await Appointment.findOne({ doctorId, status: 'in-progress' });
-    if (currentPatient) {
-      currentPatient.status = 'completed';
-      currentPatient.completedAt = new Date();
-      await currentPatient.save();
+    // Also need to get date from query to know which day's queue we are progressing
+    const { date } = req.query;
+    const targetDate = date ? new Date(date) : new Date();
+
+    const today = new Date();
+    const isToday = targetDate.getDate() === today.getDate() && 
+                    targetDate.getMonth() === today.getMonth() && 
+                    targetDate.getFullYear() === today.getFullYear();
+
+    if (!isToday) {
+      return res.status(400).json({
+        message: 'You can only process the queue and call the next patient for the current date.'
+      });
     }
 
-    // Get next waiting patient
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Check if there is already an in-progress consultation FOR THIS DATE
+    const currentPatient = await Appointment.findOne({ 
+      doctorId, 
+      status: 'in-progress',
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
+    });
+    if (currentPatient) {
+      return res.status(400).json({
+        message: 'Please complete the current consultation by providing a diagnosis and prescription first.'
+      });
+    }
+
+    // Get next waiting patient FOR THIS DATE
     const next = await Appointment.findOne({
       doctorId,
-      status: 'waiting'
+      status: 'waiting',
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     }).sort({ token: 1 });
 
     if (!next) {
@@ -96,10 +129,31 @@ const completeConsultation = async (req, res) => {
       });
     }
 
-    // Find current in-progress appointment
+    // Also need to get date to complete the right day's consultation
+    const { date } = req.query;
+    const targetDate = date ? new Date(date) : new Date();
+
+    const today = new Date();
+    const isToday = targetDate.getDate() === today.getDate() && 
+                    targetDate.getMonth() === today.getMonth() && 
+                    targetDate.getFullYear() === today.getFullYear();
+
+    if (!isToday) {
+      return res.status(400).json({
+        message: 'You can only complete consultations for the current date. Past or future dates cannot be modified.'
+      });
+    }
+
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Find current in-progress appointment FOR THIS DATE
     const appointment = await Appointment.findOne({
       doctorId,
-      status: 'in-progress'
+      status: 'in-progress',
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     });
 
     if (!appointment) {
@@ -158,7 +212,7 @@ const getPastConsultations = async (req, res) => {
 
     const consultations = await Medical.find({ doctorId })
       .populate('patientId', 'name')
-      .populate('appointmentId', 'token')
+      .populate('appointmentId', 'token appointmentDate')
       .sort({ createdAt: -1 });
 
     res.status(200).json(consultations);

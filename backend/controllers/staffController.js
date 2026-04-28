@@ -36,10 +36,18 @@ const addWalkin = async (req, res) => {
       });
     }
 
-    // Check active appointments for this doctor
+    // Generate token specific to the appointment date (walk-ins are always for today)
+    const targetDate = new Date();
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Check active appointments for this doctor ON THIS DATE
     const activeAppointments = await Appointment.find({
       doctorId,
-      status: { $in: ['waiting', 'in-progress'] }
+      status: { $in: ['waiting', 'in-progress'] },
+      appointmentDate: { $gte: startOfDay, $lte: endOfDay }
     });
 
     let token;
@@ -48,7 +56,8 @@ const addWalkin = async (req, res) => {
     } else {
       const last = await Appointment.findOne({
         doctorId,
-        status: { $in: ['waiting', 'in-progress'] }
+        status: { $in: ['waiting', 'in-progress'] },
+        appointmentDate: { $gte: startOfDay, $lte: endOfDay }
       }).sort({ token: -1 });
       token = last.token + 1;
     }
@@ -79,7 +88,8 @@ const addWalkin = async (req, res) => {
       symptoms: symptoms || '',
       token,
       status: 'waiting',
-      isWalkin: true
+      isWalkin: true,
+      appointmentDate: targetDate
     });
 
     // Populate doctorId before sending response
